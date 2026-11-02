@@ -64,6 +64,6 @@ jobs:
       - name: Keepalive Workflow
         if: always()
         run: |
-          gh workflow enable "Routine Cache Synchronizer" || true
+          gh workflow enable sync.yml || true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
