@@ -1,4 +1,4 @@
-# Routine Cache & State Synchronizer
+# blithe
 
 A lightweight automated event polling and state cache synchronization utility built with Python and GitHub Actions.
 
