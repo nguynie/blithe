@@ -139,7 +139,6 @@ class FacebookScraper:
         posts_by_id: Dict[str, FacebookPost] = {}
         scripts = re.findall(r"<script[^>]*>(.*?)</script>", text, re.DOTALL)
 
-        # 1. Primary: Parse timeline feed units from Relay Modern / Comet scripts
         for s in scripts:
             if "timeline_list_feed_units" in s or "timeline_feed_units" in s:
                 try:
@@ -150,7 +149,6 @@ class FacebookScraper:
                 except Exception:
                     pass
 
-        # 2. Secondary fallback: Look for top-level Story objects in scripts
         if not posts_by_id:
             for s in scripts:
                 if "Story" in s and "post_id" in s:
@@ -162,7 +160,6 @@ class FacebookScraper:
                     except Exception:
                         pass
 
-        # 3. Tertiary fallback: Regex search for page-specific permalinks
         if not posts_by_id:
             self._parse_regex_fallback(
                 text, posts_by_id, clean_page_base, page_id
@@ -220,14 +217,12 @@ class FacebookScraper:
                                 raw_perm = ufi_story.get("permalink_url") or ufi_story.get("url")
 
                             purl = self.clean_url(raw_perm) if raw_perm else ""
-                            # If bare permalink.php or missing, build complete permalink
                             if not purl or purl.endswith("/permalink.php"):
                                 if page_id and page_id.isdigit():
                                     purl = f"https://www.facebook.com/permalink.php?story_fbid={pid}&id={page_id}"
                                 else:
                                     purl = f"{clean_page_base}/posts/{pid}"
 
-                            # Message text extraction
                             msg = None
                             content_story = (
                                 node.get("comet_sections", {})
@@ -246,7 +241,6 @@ class FacebookScraper:
                             ):
                                 msg = node["message"].get("text")
 
-                            # Handle attached/shared story context
                             att = content_story.get("attached_story") or node.get("attached_story")
                             if att and isinstance(att, dict):
                                 att_msg = (
@@ -361,14 +355,12 @@ class FacebookScraper:
             if not clean_link:
                 continue
 
-            # Verify link belongs to this page
             if page_id and page_id not in clean_link:
                 continue
 
             match = re.search(r"/(?:posts|videos|reel)/([^/?]+)", clean_link)
             link_id = match.group(1) if match else None
             if not link_id:
-                # Check permalink.php?story_fbid=
                 match_perm = re.search(r"story_fbid=([^&]+)", clean_link)
                 link_id = match_perm.group(1) if match_perm else None
 

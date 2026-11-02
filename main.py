@@ -143,7 +143,6 @@ def main() -> None:
         service.run_daemon()
         sys.exit(0)
 
-    # Default action if no flags provided: show help or guide
     parser.print_help()
 
 

@@ -29,14 +29,12 @@ class TelegramNotifier:
             return False, "Telegram Bot Token or Chat ID is not configured in .env"
 
         try:
-            # 1. Test Bot Token with getMe
             resp = requests.get(f"{self.api_base}/getMe", timeout=10)
             data = resp.json()
             if not data.get("ok"):
                 return False, f"Invalid bot token: {data.get('description', 'Unknown error')}"
             bot_username = data.get("result", {}).get("username", "Unknown")
 
-            # 2. Test Chat ID with a ping message
             test_msg = (
                 f"<b>Dispatch Service Connected</b>\n"
                 f"Connected successfully with bot <code>@{bot_username}</code>."
@@ -78,7 +76,6 @@ class TelegramNotifier:
             resp = requests.post(url, json=payload, timeout=15)
             data = resp.json()
 
-            # Handle rate limiting (429)
             if resp.status_code == 429:
                 retry_after = data.get("parameters", {}).get("retry_after", 3)
                 logger.warning(
@@ -93,7 +90,6 @@ class TelegramNotifier:
 
             err_desc = data.get("description", "Unknown error")
 
-            # Fallback for HTML entity parsing errors: strip HTML and send plaintext
             if parse_mode == "HTML" and "can't parse entities" in err_desc.lower():
                 logger.warning(
                     f"HTML parse failed ({err_desc}). Retrying as plain text..."
@@ -124,7 +120,6 @@ class TelegramNotifier:
         """Format and send a post notification."""
         safe_name = html.escape(source_name)
 
-        # Normalize category to a valid Telegram hashtag
         clean_tag = re.sub(r"[^\w]+", "_", category.strip()).strip("_")
         tag_line = f"#{clean_tag}\n" if clean_tag else ""
 

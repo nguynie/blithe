@@ -113,7 +113,6 @@ class Storage:
                         continue
 
                     now_iso = datetime.now(timezone.utc).isoformat()
-                    # New hashed format: 64-char hex key
                     if isinstance(item, dict) and "s" in item and len(key) == 64:
                         conn.execute(
                             """
@@ -122,7 +121,6 @@ class Storage:
                             """,
                             (key, item.get("s"), item.get("t"), now_iso),
                         )
-                    # Legacy format migration
                     elif isinstance(item, dict) and "source_id" in item:
                         sid = item.get("source_id")
                         pid = str(item.get("post_id", ""))
@@ -222,7 +220,6 @@ class Storage:
 
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            # 1. Match hashed post ID
             cursor.execute(
                 "SELECT 1 FROM seen_hashes WHERE hash = ? LIMIT 1",
                 (pid_hash,),
@@ -230,7 +227,6 @@ class Storage:
             if cursor.fetchone() is not None:
                 return True
 
-            # 2. Match hashed post URL
             if post_url:
                 url_hash = self._hash_key(source_id, post_url.strip())
                 cursor.execute(
@@ -240,7 +236,6 @@ class Storage:
                 if cursor.fetchone() is not None:
                     return True
 
-                # Check any embedded numeric ID in URL
                 for emb in re.findall(r"\d{7,}", post_url):
                     emb_hash = self._hash_key(source_id, emb)
                     cursor.execute(
@@ -250,7 +245,6 @@ class Storage:
                     if cursor.fetchone() is not None:
                         return True
 
-            # Fallback check legacy seen_posts table
             cursor.execute(
                 "SELECT 1 FROM seen_posts WHERE source_id = ? AND post_id = ? LIMIT 1",
                 (source_id, pid_str),

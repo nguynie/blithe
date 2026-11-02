@@ -69,7 +69,6 @@ class NotifierService:
             logger.info(f"[{source.name}] No recent posts found or page empty.")
             return 0
 
-        # Handle first-run baseline logic
         is_first_run = not has_history
         should_baseline = (
             force_baseline
@@ -91,7 +90,6 @@ class NotifierService:
                 )
             return 0
 
-        # Filter unseen posts with enhanced URL and ID matching
         unseen_posts = [
             p for p in posts if not self.storage.is_seen(source.id, p.post_id, p.url)
         ]
@@ -99,7 +97,6 @@ class NotifierService:
         if not unseen_posts:
             return 0
 
-        # Dispatch alerts chronologically (oldest to newest) so chat shows correct sequence
         unseen_posts.sort(key=lambda x: (x.creation_time or 0))
 
         new_count = 0
@@ -161,7 +158,7 @@ class NotifierService:
             try:
                 last_dt = datetime.fromisoformat(last_alert_str)
                 elapsed = (datetime.now(timezone.utc) - last_dt).total_seconds()
-                if elapsed < 86400:  # 24 hours rate limit
+                if elapsed < 86400:
                     logger.warning(
                         f"Facebook auth issue detected, but alert already sent {int(elapsed)}s ago. Suppressing."
                     )
@@ -215,11 +212,9 @@ class NotifierService:
             except Exception as e:
                 logger.error(f"Error scanning source {source.name} ({source.url}): {e}")
 
-            # Check for consecutive auth/checkpoint failures
             if self.scraper.consecutive_auth_failures >= 5:
                 self._check_and_alert_auth_issue()
 
-            # Introduce jitter between page requests if more sources remain
             if idx < total_sources and self.config.request_delay_seconds > 0:
                 jitter = random.uniform(0.8, 1.2) * self.config.request_delay_seconds
                 time.sleep(jitter)
@@ -227,7 +222,6 @@ class NotifierService:
         if self.scraper.consecutive_auth_failures >= 5:
             self._check_and_alert_auth_issue()
 
-        # Ensure state is flushed to JSON
         self.storage.sync_to_json()
 
         logger.info(

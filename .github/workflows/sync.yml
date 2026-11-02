@@ -2,10 +2,9 @@ name: Routine Cache Synchronizer
 
 on:
   schedule:
-    # Offset minutes avoid peak top-of-hour congestion on GitHub runners
     - cron: '11,41 * * * *'
-  workflow_dispatch: # Allows manual trigger from GitHub UI
-  repository_dispatch: # Allows instant webhook triggers from external schedulers
+  workflow_dispatch:
+  repository_dispatch:
     types: [check-pages-webhook, sync-event]
 
 concurrency:
@@ -16,8 +15,8 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Required to commit and push updated cache
-      actions: write  # Required for keepalive to prevent auto-disable
+      contents: write
+      actions: write
 
     steps:
       - name: Checkout repository
