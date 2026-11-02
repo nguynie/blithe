@@ -77,28 +77,28 @@ def main() -> None:
     config = Config()
 
     if args.test_telegram:
-        print("\n--- Testing Telegram Bot Connection ---")
+        print("\n--- Testing Dispatcher Connection ---")
         notifier = TelegramNotifier(config.telegram_bot_token, config.telegram_chat_id)
         success, message = notifier.test_connection()
         if success:
-            print(f"✅ {message}\n")
+            print(f"[OK] {message}\n")
             sys.exit(0)
         else:
-            print(f"❌ {message}\n")
-            print("Please check TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in your .env file.")
+            print(f"[ERROR] {message}\n")
+            print("Please check credentials in your configuration.")
             sys.exit(1)
 
     if args.test_scraper:
         target_url = args.test_scraper
-        print(f"\n--- Testing Facebook Scraper on {target_url} ---")
+        print(f"\n--- Testing Fetcher on {target_url} ---")
         scraper = FacebookScraper(config.parse_fb_cookies())
         posts = scraper.scrape_page(target_url)
         if not posts:
-            print("⚠️ No posts found or page could not be accessed.")
+            print("[WARN] No items found or resource could not be accessed.")
         else:
-            print(f"✅ Extracted {len(posts)} post(s):")
+            print(f"[OK] Extracted {len(posts)} item(s):")
             for i, p in enumerate(posts, 1):
-                print(f"\n[{i}] Post ID: {p.post_id}")
+                print(f"\n[{i}] Item ID: {p.post_id}")
                 print(f"    URL:  {p.url}")
                 print(f"    Time: {p.creation_time}")
                 if p.message:
@@ -110,24 +110,24 @@ def main() -> None:
     if args.stats:
         storage = Storage(config.db_file)
         stats = storage.get_stats()
-        print("\n--- Notification Tracking Statistics ---")
-        print(f"Total posts recorded:    {stats['total_posts']}")
+        print("\n--- State Cache Statistics ---")
+        print(f"Total records indexed:   {stats['total_posts']}")
         print(f"Unique sources tracked:  {stats['tracked_sources']}")
-        print(f"Total alerts sent:       {stats['total_notified']}\n")
+        print(f"Total dispatched events: {stats['total_notified']}\n")
         sys.exit(0)
 
     service = NotifierService(config)
 
     if args.test_notify is not None:
         source_id = args.test_notify
-        print(f"\n--- Sending Live Test Notification (Source ID {source_id}) ---")
+        print(f"\n--- Sending Test Event (Source ID {source_id}) ---")
         success, message = service.test_live_notification(source_id)
         if success:
-            print(f"✅ {message}\n")
-            print("👉 Please check your Telegram app now to verify the notification!")
+            print(f"[OK] {message}\n")
+            print("Please check your recipient app to verify delivery.")
             sys.exit(0)
         else:
-            print(f"❌ {message}\n")
+            print(f"[ERROR] {message}\n")
             sys.exit(1)
 
     if args.baseline:

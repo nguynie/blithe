@@ -38,7 +38,7 @@ class TelegramNotifier:
 
             # 2. Test Chat ID with a ping message
             test_msg = (
-                f"🔔 <b>Facebook Notifier Connected!</b>\n"
+                f"<b>Dispatch Service Connected</b>\n"
                 f"Connected successfully with bot <code>@{bot_username}</code>."
             )
             sent, err = self.send_message(test_msg)
@@ -126,7 +126,7 @@ class TelegramNotifier:
 
         # Normalize category to a valid Telegram hashtag
         clean_tag = re.sub(r"[^\w]+", "_", category.strip()).strip("_")
-        tag_line = f"🏷️ #{clean_tag}\n" if clean_tag else ""
+        tag_line = f"#{clean_tag}\n" if clean_tag else ""
 
         time_line = ""
         if creation_time:
@@ -135,7 +135,7 @@ class TelegramNotifier:
                     creation_time, tz=timezone.utc
                 ).astimezone()
                 time_str = dt.strftime("%Y-%m-%d %H:%M")
-                time_line = f"🕒 <i>{time_str}</i>\n\n"
+                time_line = f"<i>{time_str}</i>\n\n"
             except Exception:
                 pass
 
@@ -148,11 +148,11 @@ class TelegramNotifier:
 
         safe_url = html.escape(post_url)
         formatted_text = (
-            f"📢 <b>{safe_name}</b> vừa đăng bài mới!\n"
+            f"<b>{safe_name}</b> vừa đăng bài mới!\n"
             f"{tag_line}"
             f"{time_line}"
             f"{snippet}"
-            f"🔗 <a href=\"{safe_url}\">Xem bài viết trên Facebook</a>"
+            f"<a href=\"{safe_url}\">Xem bài viết</a>"
         )
 
         return self.send_message(formatted_text, disable_web_page_preview=False)

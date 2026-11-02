@@ -172,10 +172,10 @@ class NotifierService:
         details = self.scraper.last_auth_error or "Phiên đăng nhập bị chặn hoặc hết hạn"
         escaped_details = html.escape(details)
         admin_msg = (
-            "⚠️ <b>[Sync Notifier - System Alert]</b>\n\n"
+            "<b>[Sync Notifier - System Alert]</b>\n\n"
             "Phát hiện lỗi phiên đăng nhập Facebook (Cookies đã hết hạn hoặc bị yêu cầu xác thực Checkpoint).\n"
             f"Chi tiết: <code>{escaped_details}</code>\n\n"
-            "👉 Vui lòng cập nhật <code>FB_COOKIES</code> trong GitHub Secrets (Settings > Secrets and variables > Actions) để tiếp tục nhận thông báo tự động!"
+            "Vui lòng cập nhật <code>FB_COOKIES</code> trong GitHub Secrets (Settings > Secrets and variables > Actions) để tiếp tục nhận thông báo tự động!"
         )
         success, err = self.notifier.send_message(admin_msg)
         if success:
