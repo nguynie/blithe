@@ -83,7 +83,7 @@ class Config:
         self.auto_baseline_first_run = auto_baseline_str in ("true", "1", "yes")
 
         self.sources_file = self.base_dir / "sources.yaml"
-        self.db_file = self.base_dir / "seen_posts.db"
+        self.db_file = self.base_dir / "index.db"
 
     def parse_fb_cookies(self) -> Dict[str, str]:
         """Parse raw cookie header string into a dictionary."""

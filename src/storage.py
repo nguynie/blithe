@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class Storage:
     def __init__(self, db_path: Path):
         self.db_path = db_path
-        self.json_path = db_path.parent / "seen_posts.json"
+        self.json_path = db_path.parent / "index.json"
         self.init_db()
         self._sync_from_json()
 
@@ -89,7 +89,7 @@ class Storage:
         return hashlib.sha256(raw).hexdigest()
 
     def _sync_from_json(self) -> None:
-        """Load seen post hashes from seen_posts.json if available."""
+        """Load seen hashes from index.json if available."""
         if not self.json_path.is_file():
             return
         try:
@@ -148,7 +148,7 @@ class Storage:
             logger.warning(f"Could not load state from {self.json_path}: {e}")
 
     def _sync_to_json(self) -> None:
-        """Export all seen hashes atomically to seen_posts.json without sensitive strings."""
+        """Export all seen hashes atomically to index.json without sensitive strings."""
         try:
             with self._get_connection() as conn:
                 cursor = conn.cursor()

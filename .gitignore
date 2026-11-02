@@ -4,6 +4,8 @@ sources.yaml
 
 seen_posts.db
 seen_posts.db-journal
+index.db
+index.db-journal
 
 __pycache__/
 *.py[cod]
