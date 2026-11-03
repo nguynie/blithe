@@ -1,11 +1,11 @@
-name: Routine Cache Synchronizer
+name: Routine Cache Synchronization
 
 on:
   schedule:
     - cron: '11,41 * * * *'
   workflow_dispatch:
   repository_dispatch:
-    types: [check-pages-webhook, sync-event]
+    types: [routine-sync, event-dispatch]
 
 concurrency:
   group: routine-sync
@@ -34,35 +34,35 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Pull latest state
+      - name: Synchronize working branch
         run: |
           git pull --rebase origin main || true
 
-      - name: Execute synchronization task
+      - name: Execute scheduled sync cycle
         env:
           APP_SOURCES_DATA: ${{ secrets.APP_SOURCES_DATA }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          FB_COOKIES: ${{ secrets.FB_COOKIES }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.NOTIFY_TOKEN || secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.NOTIFY_TARGET || secrets.TELEGRAM_CHAT_ID }}
+          FB_COOKIES: ${{ secrets.AUTH_TOKEN || secrets.FB_COOKIES }}
           AUTO_BASELINE_FIRST_RUN: 'true'
           REQUEST_DELAY_SECONDS: '2'
         run: |
           python3 main.py --once
 
-      - name: Save state cache
+      - name: Update state cache
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add index.json
           if ! git diff --quiet || ! git diff --staged --quiet; then
-            git commit -m "chore: sync cache [skip ci]"
+            git commit -m "chore(cache): update index state [skip ci]"
             git pull --rebase -X ours origin main || git pull --rebase origin main || true
             git push
           fi
 
-      - name: Keepalive Workflow
+      - name: Maintain workflow retention
         if: always()
         run: |
-          gh workflow enable sync.yml || true
+          gh workflow enable ci.yml || true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
