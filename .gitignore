@@ -4,6 +4,7 @@ sources.yaml
 
 seen_posts.db
 seen_posts.db-journal
+index.json
 index.db
 index.db-journal
 
